@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="${package}.dao.${className}Dao">
+
+	<resultMap type="${package}.domain.${className}DO" id="${classname}Map">
+		#foreach($column in $columns)
+			<result property="${column.attrname}" column="${column.columnName}" jdbcType="${column.dataType}"/>
+		#end
+	</resultMap>
+
+	<sql id="Base_Column_List">
+      ${allColumnName}
+   </sql>
+
+	<sql id="table_name">
+      ${tableName}
+   </sql>
+
+	<!--查询${comments}个体  -->
+	<select id="get${className}" resultType="${package}.domain.${className}DO">
+		select  <include refid="Base_Column_List"/>
+        from <include refid="table_name"/>
+        where ${pk.columnName} = #{value}
+	</select>
+
+	<!--查询${comments}列表 -->
+	<select id="query${className}List" resultType="${package}.domain.${className}DO">
+		select
+		<include refid="Base_Column_List"/>
+        from <include refid="table_name"/>
+        <where>  
+		  #foreach($column in $columns)
+		  <if test="$column.attrname != null and $column.attrname.trim() != ''"> and $column.columnName = #{$column.attrname} </if>
+		  #end
+		</where>
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+			<otherwise>
+                order by ${pk.columnName} desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<!--计数${comments} -->
+ 	<select id="count" resultType="int">
+		select count(*) from <include refid="table_name"/>
+		 <where>  
+		  #foreach($column in $columns)
+		  <if test="$column.attrname != null and $column.attrname.trim() != ''"> and $column.columnName = #{$column.attrname} </if>
+		  #end
+		</where>
+	</select>
+
+
+	<!--插入${comments} -->
+	<insert id="insert" parameterType="${package}.domain.${className}DO"#if($pk.extra == 'auto_increment') useGeneratedKeys="true" keyProperty="$pk.attrname"#end>
+		insert into <include refid="table_name"/> (<include refid="Base_Column_List" />)
+		values (${allColumnValue})
+	</insert>
+
+	<!--批量插入${comments} -->
+	<insert id="batchInsert${className}" parameterType="${package}.domain.${className}DO" >
+		insert into
+		<include refid="table_name"/>
+		(<include refid="Base_Column_List" />)
+		values
+		<foreach collection ="${classname}DOList" item="${classname}DO" separator =",">
+			(${allColumnValueList})
+		</foreach >
+	</insert>
+
+	<!--修改${comments} -->
+	<update id="update" parameterType="${package}.domain.${className}DO">
+		update <include refid="table_name"/>
+		<set>
+			#foreach($column in $columns)
+			#if($column.columnName != $pk.columnName)
+						<if test="$column.attrname != null">`$column.columnName` = #{$column.attrname}#if($velocityCount != $columns.size()), #end</if>
+			#end
+			#end
+		</set>
+		where ${pk.columnName} = #{${pk.attrname}}
+	</update>
+
+	<!--逻辑删除${comments} -->
+	<update id="delete${className}" parameterType="${package}.dommain.${className}DO" >
+		update <include refid="table_name"/>
+		<set>
+			is_deleted = #{isDeleted}
+		</set>
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<!--物理删除${comments} -->
+	<delete id="remove">
+		delete from <include refid="table_name"/> where ${pk.columnName} = #{value}
+	</delete>
+
+	<!--批量删除${comments} -->
+	<delete id="batchRemove">
+		delete from <include refid="table_name"/>  where ${pk.columnName} in
+		<foreach item="${pk.attrname}" collection="array" open="(" separator="," close=")">
+			#{${pk.attrname}}
+		</foreach>
+	</delete>
+
+
+</mapper>

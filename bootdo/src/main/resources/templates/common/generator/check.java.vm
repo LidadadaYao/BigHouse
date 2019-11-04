@@ -1,0 +1,156 @@
+package ${package}.biz.check.${pathName};
+
+import org.apache.commons.lang.StringUtils;
+import ${package}.common.enums.ErrorCodeEnum;
+import ${package}.common.enums.SuccessCodeEnum;
+import ${package}.common.enums.${pathName}.${className}CodeEnum;
+import ${package}.common.response.CheckResponse;
+import ${package}.api.vos.${pathName}.${className}VO;
+import ${package}.common.constant.CommonConstants;
+import ${package}.common.constant.DataStateConstants;
+import ${package}.dal.query.${pathName}.${className}Query;
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public class ${className}Check {
+
+    /**
+     * 新增入参数据校验
+     *
+     * @param ${classname}VO
+     * @return
+     */
+    public static CheckResponse checkInsertPaream(${className}VO ${classname}VO) {
+        if (null == ${classname}VO) {
+            return new CheckResponse(ErrorCodeEnum.PARAM_IS_EMPTY.getErrorCode(),
+                ErrorCodeEnum.PARAM_IS_EMPTY.getErrorMessage());
+        }
+        #foreach ($column in $columns)
+            #if($column.isNullAble == "NO")
+                #if($column.attrname != "id")
+                    #if($column.attrname != "gmtCreate")
+                        #if($column.attrname != "gmtModified")
+                            #if(${column.attrname} != "creator")
+                                #if($column.attrname != "modifier")
+                                    #if($column.attrname != "isDelete")
+                                        #if($column.attrType == "String")
+                                            if (StringUtils.isEmpty(${classname}VO.get${column.attrName}())) {
+                                                return new CheckResponse(
+                                                            ${className}CodeEnum.${column.columnNAME}_EMPTY.getCode(),
+                                                            ${className}CodeEnum.${column.columnNAME}_EMPTY
+                                                    .getMessage());
+                                            }
+                                        #else
+                                            if (null == ${classname}VO.get${column.attrName}()) {
+                                                return new CheckResponse(
+                                                            ${className}CodeEnum.${column.columnNAME}_EMPTY.getCode(),
+                                                            ${className}CodeEnum.${column.columnNAME}_EMPTY
+                                                    .getMessage());
+                                            }
+                                        #end
+                                    #end
+                                #end
+                            #end
+                        #end
+                    #end
+                #end
+            #end
+        #end
+        return new CheckResponse(SuccessCodeEnum.PAREAM_CHEKC.getSuccessMessage());
+    }
+
+    /**
+     * 修改入参数据校验
+     * @param ${classname}VO
+     * @return
+     */
+    public static CheckResponse checkUpdatePaream(${className}VO ${classname}VO) {
+        if (null == ${classname}VO) {
+            return new CheckResponse(ErrorCodeEnum.PARAM_IS_EMPTY.getErrorCode(),
+                ErrorCodeEnum.PARAM_IS_EMPTY.getErrorMessage());
+        }
+        #foreach ($column in $columns)
+            #if($column.isNullAble == "NO")
+                #if($column.attrname != "gmtCreate")
+                    #if($column.attrname != "gmtModifier")
+                        #if(${column.attrname} != "creator")
+                            #if($column.attrname != "modifier")
+                                #if($column.attrname != "isDelete")
+                                    #if($column.attrType == "String")
+                                        if (StringUtils.isEmpty(${classname}VO.get${column.attrName}())) {
+                                            return new CheckResponse(
+                                                        ${className}CodeEnum.${column.columnNAME}_EMPTY.getCode(),
+                                                        ${className}CodeEnum.${column.columnNAME}_EMPTY.getMessage());
+                                        }
+                                    #else
+                                        if (null == ${classname}VO.get${column.attrName}()) {
+                                            return new CheckResponse(
+                                                        ${className}CodeEnum.${column.columnNAME}_EMPTY.getCode(),
+                                                        ${className}CodeEnum.${column.columnNAME}_EMPTY.getMessage());
+                                        }
+                                    #end
+                                #end
+                            #end
+                        #end
+                    #end
+                #end
+            #end
+        #end
+        return new CheckResponse(SuccessCodeEnum.PAREAM_CHEKC.getSuccessMessage());
+    }
+
+    /**
+     * 单条数据主键数据校验
+     * @param id
+     * @return
+     */
+    public static CheckResponse checkPareamKey(Long id) {
+        if (null == id) {
+            return new CheckResponse(ErrorCodeEnum.PARAM_IS_EMPTY.getErrorCode(),
+                ErrorCodeEnum.PARAM_IS_EMPTY.getErrorMessage());
+        }
+        return new CheckResponse(SuccessCodeEnum.PAREAM_CHEKC.getSuccessMessage());
+    }
+
+    /**
+     * 列表查询数据校验
+     *
+     * @param ${classname}Query
+     * @return
+     */
+    public static CheckResponse checkListPaream(${className}Query ${classname}Query) {
+        ${classname}Query.setIsDelete(DataStateConstants.IS_DELETED);
+        return new CheckResponse(SuccessCodeEnum.PAREAM_CHEKC.getSuccessMessage());
+    }
+
+    /**
+     * 分页查询数据校验
+     *
+     * @param ${classname}Query
+     * @return
+     */
+    public static CheckResponse checkPagePaream(${className}Query ${classname}Query) {
+        if (null == ${classname}Query) {
+            return new CheckResponse(ErrorCodeEnum.PARAM_IS_EMPTY.getErrorCode(),
+                ErrorCodeEnum.PARAM_IS_EMPTY.getErrorMessage());
+        }
+        if (null == ${classname}Query.getPageSize() || null == ${classname}Query.getPageNo()) {
+            ${classname}Query.setPageNo(CommonConstants.DEFAULT_PAGE_NO);
+            ${classname}Query.setPageSize(CommonConstants.DEFAULT_PAGE_SIZE);
+            ${classname}Query.setOffset(CommonConstants.DEFAULT_PAGE_SORT);
+        } else {
+            ${classname}Query.setOffset((${classname}Query.getPageNo() - 1) * ${classname}Query.getPageSize());
+        }
+        ${classname}Query.setIsDelete(DataStateConstants.IS_DELETED);
+        return new CheckResponse(SuccessCodeEnum.PAREAM_CHEKC.getSuccessMessage());
+    }
+}
